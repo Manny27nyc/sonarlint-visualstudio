@@ -30,6 +30,8 @@ namespace SonarLint.VisualStudio.Roslyn.Suppressions
     internal interface IContainer : IDisposable
     {
         ILogger Logger { get; }
+        ISuppressionsChecker SuppressionsChecker { get; }
+        ISettingsCache SettingsCache { get; }
     }
 
     internal sealed class Container : IContainer
@@ -58,14 +60,18 @@ namespace SonarLint.VisualStudio.Roslyn.Suppressions
         private readonly ISuppressedIssuesFileWatcher fileWatcher;
 
         public ILogger Logger { get; }
+        public ISuppressionsChecker SuppressionsChecker { get;}
+        public ISettingsCache SettingsCache { get; }
 
         public Container()
         {
             Directory.CreateDirectory(RoslynSettingsFileInfo.Directory);
             Logger = new Logger();
 
-            var settingsCache = new SettingsCache(Logger);
-            fileWatcher = new SuppressedIssuesFileWatcher(settingsCache, Logger);
+            SettingsCache = new SettingsCache(Logger);
+            fileWatcher = new SuppressedIssuesFileWatcher(SettingsCache, Logger);
+
+            SuppressionsChecker = new SuppressionsChecker();
         }
 
         public void Dispose()
